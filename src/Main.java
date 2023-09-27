@@ -4,12 +4,12 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
-    private static List<String> rooms = new ArrayList<>();
+    private static final List<String> rooms = new ArrayList<>();
     private static int userRoom = 10;
-    private static int code = 1234;
+    private static final int code = 1234;
     private static boolean securityOn = true;
-    private static Scanner scanner = new Scanner(System.in);
-    private static Random random = new Random();
+    private static final Scanner scanner = new Scanner(System.in);
+    private static final Random random = new Random();
 
     public static int getUserRoom() {
         return userRoom;
@@ -75,6 +75,7 @@ public class Main {
         }
         int optionCounter = roomNumbers.length + 1;
 
+        // Print default controls
         if (isSecurityRoom)
             System.out.println(optionCounter++ + ". Turn " + (isSecurityOn() ? "off" : "on") + " the security");
         System.out.println(optionCounter++ + ". Simulate break-in");
@@ -116,8 +117,6 @@ public class Main {
             MovementSimulator.simulateBackyardMovement(rooms, getUserRoom(), isSecurityOn(), random);
         else if (Integer.parseInt(userInput) == 0)
             exit();
-        else
-            return;
     }
 
     // Print the entire user interface in one line per unique room
@@ -127,6 +126,7 @@ public class Main {
         handleUserInput(userInput, isSecurityRoom, roomNumbers);
     }
 
+    // Print the UI and add all the rooms to the list
     public static void main(String[] args) {
         rooms.add("Entrance");
         rooms.add("Living Room");
@@ -151,9 +151,7 @@ public class Main {
                 case 3, 4, 5 -> userInterface(rooms, false, 0);
                 case 6, 7, 8, 9 -> userInterface(rooms, false, 1);
                 case 10 -> userInterface(rooms, false, 0, 2);
-                default -> {
-                    break;
-                }
+                default -> {}
             }
         }
     }
