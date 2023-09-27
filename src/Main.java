@@ -5,18 +5,18 @@ import java.util.Scanner;
 
 public class Main {
     private static List<String> rooms = new ArrayList<>();
-    private static int currentRoom = 10;
+    private static int userRoom = 10;
     private static int code = 1234;
     private static boolean securityOn = true;
     private static Scanner scanner = new Scanner(System.in);
     private static Random random = new Random();
 
-    public static int getCurrentRoom() {
-        return currentRoom;
+    public static int getUserRoom() {
+        return userRoom;
     }
 
-    public static void setCurrentRoom(int currentRoom) {
-        Main.currentRoom = currentRoom;
+    public static void setUserRoom(int userRoom) {
+        Main.userRoom = userRoom;
     }
 
     public static int getCode() {
@@ -50,13 +50,8 @@ public class Main {
             System.out.print("Enter the code: ");
             String userInput = scanner.nextLine();
             if (userInput.equals(String.valueOf(getCode()))) {
-                if (isSecurityOn()) {
-                    System.out.println("Correct! You Turned off the security system.");
-                    setSecurityOn(false);
-                } else {
-                    System.out.println("Correct! You Turned on the security system.");
-                    setSecurityOn(true);
-                }
+                System.out.println("Correct! You Turned " + (isSecurityOn() ? "off" : "on") + " the security system.");
+                setSecurityOn(!isSecurityOn());
                 break;
             } else {
                 tries--;
@@ -96,7 +91,7 @@ public class Main {
             }
         }
         if (isPresent)
-            setCurrentRoom(roomNumbers[Integer.parseInt(userInput) - 1]);
+            setUserRoom(roomNumbers[Integer.parseInt(userInput) - 1]);
 
         int optionCounter = roomNumbers.length + 1;
         if (isSecurityRoom) {
@@ -107,12 +102,12 @@ public class Main {
 
         if (Integer.parseInt(userInput) == optionCounter + 1) {
             int breakInRoom = random.nextInt(1, 9);
-            BreakInSimulator.simulateBreakIn(breakInRoom, rooms, getCurrentRoom(), isSecurityOn(), random);
+            BreakInSimulator.simulateBreakIn(breakInRoom, rooms, getUserRoom(), isSecurityOn(), random);
         } else if (Integer.parseInt(userInput) == optionCounter + 2) {
             int fireRoom = random.nextInt(1, 9);
-            FireSimulator.simulation(fireRoom, rooms, currentRoom);
+            FireSimulator.simulation(fireRoom, rooms, userRoom);
         } else if (Integer.parseInt(userInput) == optionCounter + 3)
-            MovementSimulator.simulateBackyardMovement(rooms, getCurrentRoom(), isSecurityOn(), random);
+            MovementSimulator.simulateBackyardMovement(rooms, getUserRoom(), isSecurityOn(), random);
         else if (Integer.parseInt(userInput) == 0)
             exit();
         else
@@ -140,9 +135,9 @@ public class Main {
 
         while (true) {
             System.out.println("\n---Security System:" + (isSecurityOn() ? "ON" : "OFF") + "---");
-            System.out.println("Current room: " + rooms.get(getCurrentRoom()));
+            System.out.println("Current room: " + rooms.get(getUserRoom()));
             System.out.println("What would you like to do?");
-            switch (getCurrentRoom()) {
+            switch (getUserRoom()) {
                 case 0 -> userInterface(rooms, true, 10, 1, 2, 3, 4, 5);
                 case 1 -> userInterface(rooms, true, 0, 6, 7, 8, 9);
                 case 2 -> userInterface(rooms, true, 0, 10);
