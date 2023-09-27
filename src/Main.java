@@ -8,7 +8,6 @@ public class Main {
     private static int currentRoom = 10;
     private static int code = 1234;
     private static boolean securityOn = true;
-    private static boolean running = true;
     private static Scanner scanner = new Scanner(System.in);
     private static Random random = new Random();
 
