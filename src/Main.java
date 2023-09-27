@@ -43,6 +43,7 @@ public class Main {
             System.exit(0);
     }
 
+    // Toggle the security system on/off based on user input
     public static void securityToggle() {
         int tries = 3;
         while (tries > 0) {
@@ -65,7 +66,9 @@ public class Main {
         }
     }
 
+    // Print options for the user to choose from based on their location
     public static void printRoomOptions(List<String> rooms, boolean isSecurityRoom, int... roomNumbers) {
+        // Print every room the user can move to
         for (int i = 0; i < roomNumbers.length; i++) {
             int roomNumber = roomNumbers[i];
             System.out.println((i + 1) + ". Move to " + rooms.get(roomNumber));
@@ -81,8 +84,10 @@ public class Main {
         System.out.print("Enter a number: ");
     }
 
+    // Handle user input based on their selection
     public static void handleUserInput(String userInput, boolean isSecurityRoom, int... roomNumbers) {
         boolean isPresent = false;
+        // Check if the user input is a valid room number
         for (int i = 1; i < roomNumbers.length + 1; i++) {
             if (i == Integer.parseInt(userInput)) {
                 System.out.println(i);
@@ -94,17 +99,18 @@ public class Main {
             setUserRoom(roomNumbers[Integer.parseInt(userInput) - 1]);
 
         int optionCounter = roomNumbers.length + 1;
+        // If the room can toggle security, handle security-related options
         if (isSecurityRoom) {
             if (Integer.parseInt(userInput) == optionCounter)
                 securityToggle();
         } else
             optionCounter -= 1;
-
+        // Handle other general options
         if (Integer.parseInt(userInput) == optionCounter + 1) {
-            int breakInRoom = random.nextInt(1, 9);
+            int breakInRoom = random.nextInt(0, 9);
             BreakInSimulator.simulateBreakIn(breakInRoom, rooms, getUserRoom(), isSecurityOn(), random);
         } else if (Integer.parseInt(userInput) == optionCounter + 2) {
-            int fireRoom = random.nextInt(1, 9);
+            int fireRoom = random.nextInt(0, 9);
             FireSimulator.simulation(fireRoom, rooms, userRoom);
         } else if (Integer.parseInt(userInput) == optionCounter + 3)
             MovementSimulator.simulateBackyardMovement(rooms, getUserRoom(), isSecurityOn(), random);
@@ -114,6 +120,7 @@ public class Main {
             return;
     }
 
+    // Print the entire user interface in one line per unique room
     public static void userInterface(List<String> rooms, boolean isSecurityRoom, int... roomNumbers) {
         printRoomOptions(rooms, isSecurityRoom, roomNumbers);
         String userInput = scanner.nextLine();

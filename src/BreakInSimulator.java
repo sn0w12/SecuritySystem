@@ -24,10 +24,10 @@ public class BreakInSimulator {
     public static int generateNextRoom(int min, int max, int breakInRoom, List<Integer> visitedRooms, Random random) {
         int nextRoom = random.nextInt(min, (max + 1));
         boolean containsAll = IntStream.rangeClosed(min, max).allMatch(visitedRooms::contains);
+        // Keep generating a new room until an unvisited one is found, if every room is visited move to either living room or entrance
         if (!containsAll) {
-            while (visitedRooms.contains(nextRoom)) {
+            while (visitedRooms.contains(nextRoom))
                 nextRoom = random.nextInt(min, max + 1);
-            }
         } else if (breakInRoom == 0)
             nextRoom = 1;
         else
@@ -53,6 +53,7 @@ public class BreakInSimulator {
         boolean seen = false;
         boolean containsAll = IntStream.rangeClosed(0, 8).allMatch(visitedRooms::contains);
 
+        // Decide the robbers next room depending on what room they are in
         while (chance > 0 && !seen) {
             chance = random.nextInt(10);
             switch (breakInRoom) {
