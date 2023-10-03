@@ -38,9 +38,9 @@ public class BreakInSimulator {
 
     public static void nextRoomOutput(int breakInRoom, List<String> rooms, int userRoom, List<Integer> visitedRooms) {
         if (userRoom == breakInRoom)
-            System.out.println("The robbers moved to " + rooms.get(breakInRoom) + ", were seen by you and ran away.");
+            System.out.println("The robbers move to " + rooms.get(breakInRoom) + ", were seen by you and ran away.");
         else if (!visitedRooms.contains(breakInRoom)) {
-            System.out.println("The robbers moved to " + rooms.get(breakInRoom) + " and stole everything in the room.");
+            System.out.println("The robbers move to " + rooms.get(breakInRoom) + " and stole everything in the room.");
             visitedRooms.add(breakInRoom);
         } else
             System.out.println("The robbers move back to " + rooms.get(breakInRoom) + ".");
