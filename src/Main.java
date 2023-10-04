@@ -1,50 +1,136 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
+
+class Room {
+    private final String name;
+    private final List<Detector> detectors;
+
+    public Room(String name) {
+        this.name = name;
+        this.detectors = new ArrayList<>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void addDetector(Detector detector) {
+        detectors.add(detector);
+    }
+
+    public void addDefaultDetectors() {
+        addDetector(new SmokeDetector(DetectorGroup.FIRE));
+        addDetector(new WindowDetector(DetectorGroup.ROBBERY));
+        addDetector(new DoorDetector(DetectorGroup.ROBBERY));
+    }
+
+    public void activateDetectors(DetectorGroup eventType) {
+        for (Detector detector : detectors) {
+            if (detector.detect() && (detector.getGroup() == eventType)) {
+                System.out.println("Alarm activated in " + name + " due to " + detector.getType());
+                break;
+            }
+        }
+    }
+}
+
+abstract class Detector {
+    private final String type;
+    private final DetectorGroup group;
+
+    public Detector(String type, DetectorGroup group) {
+        this.type = type;
+        this.group = group;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public DetectorGroup getGroup() {
+        return group;
+    }
+
+    public boolean detect() {
+        return true;
+    }
+}
+
+class WindowDetector extends Detector {
+    public WindowDetector(DetectorGroup group) {
+        super("Window Detector", group);
+    }
+}
+
+class DoorDetector extends Detector {
+    public DoorDetector(DetectorGroup group) {
+        super("Door Detector", group);
+    }
+}
+
+class MotionDetector extends Detector {
+    public MotionDetector(DetectorGroup group) {
+        super("Motion Detector", group);
+    }
+}
+
+class SmokeDetector extends Detector {
+    public SmokeDetector(DetectorGroup group) {
+        super("Smoke Detector", group);
+    }
+}
+
+enum DetectorGroup {
+    ROBBERY, FIRE
+}
 
 public class Main {
-    private static final List<String> rooms = new ArrayList<>();
-    private static int userRoom = 10;
-    private static final int code = 1234;
-    private static boolean securityOn = true;
-    private static final Scanner scanner = new Scanner(System.in);
-    private static final Random random = new Random();
+    private final Scanner scanner;
+    private final int code;
+    private boolean securityOn;
+    private int userRoom;
+    private final Random random;
 
-    public static int getUserRoom() {
-        return userRoom;
+    public Main() {
+        this.scanner = new Scanner(System.in);
+        this.code = 1234;
+        this.securityOn = true;
+        this.userRoom = 10;
+        this.random = new Random();
     }
 
-    public static void setUserRoom(int userRoom) {
-        Main.userRoom = userRoom;
-    }
-
-    public static int getCode() {
+    public int getCode() {
         return code;
     }
 
-    public static boolean isSecurityOn() {
+    public boolean isSecurityOn() {
         return securityOn;
     }
 
-    public static void setSecurityOn(boolean securityOn) {
-        Main.securityOn = securityOn;
+    public void setSecurityOn(boolean securityOn) {
+        this.securityOn = securityOn;
     }
 
-    public static void pause() {
+    public int getUserRoom() {
+        return userRoom;
+    }
+
+    public void setUserRoom(int userRoom) {
+        this.userRoom = userRoom;
+    }
+
+    public void pause() {
         System.out.print("\nPress enter to continue...");
         scanner.nextLine();
     }
 
-    public static void exit() {
+    public void exit() {
         System.out.println("Do you want to exit? y/n");
         String userInput = scanner.nextLine();
         if (userInput.equalsIgnoreCase("y"))
             System.exit(0);
     }
 
-    // Toggle the security system on/off based on user input
-    public static void securityToggle() {
+    public void securityToggle() {
         int tries = 3;
         while (tries > 0) {
             System.out.println("You have " + tries + " tries left to put in the code to the security system.");
@@ -66,16 +152,13 @@ public class Main {
         }
     }
 
-    // Print options for the user to choose from based on their location
-    public static void printRoomOptions(List<String> rooms, boolean isSecurityRoom, int... roomNumbers) {
-        // Print every room the user can move to
+    public void printRoomOptions(List<Room> rooms, boolean isSecurityRoom, int... roomNumbers) {
         for (int i = 0; i < roomNumbers.length; i++) {
             int roomNumber = roomNumbers[i];
-            System.out.println((i + 1) + ". Move to " + rooms.get(roomNumber));
+            System.out.println((i + 1) + ". Move to " + rooms.get(roomNumber).getName());
         }
         int optionCounter = roomNumbers.length + 1;
 
-        // Print default controls
         if (isSecurityRoom)
             System.out.println(optionCounter++ + ". Turn " + (isSecurityOn() ? "off" : "on") + " the security");
         System.out.println(optionCounter++ + ". Simulate break-in");
@@ -85,10 +168,11 @@ public class Main {
         System.out.print("Enter a number: ");
     }
 
-    // Handle user input based on their selection
-    public static void handleUserInput(String userInput, boolean isSecurityRoom, int... roomNumbers) {
+    public void handleUserInput(List<Room> rooms, String userInput, boolean isSecurityRoom, int... roomNumbers) {
         boolean isPresent = false;
-        // Check if the user input is a valid room number
+        BreakInSimulator breakInSimulator = new BreakInSimulator();
+        FireSimulator fireSimulator = new FireSimulator();
+        MovementSimulator movementSimulator = new MovementSimulator();
         for (int i = 1; i < roomNumbers.length + 1; i++) {
             if (i == Integer.parseInt(userInput)) {
                 System.out.println(i);
@@ -100,58 +184,74 @@ public class Main {
             setUserRoom(roomNumbers[Integer.parseInt(userInput) - 1]);
 
         int optionCounter = roomNumbers.length + 1;
-        // If the room can toggle security, handle security-related options
         if (isSecurityRoom) {
             if (Integer.parseInt(userInput) == optionCounter)
                 securityToggle();
         } else
             optionCounter -= 1;
-        // Handle other general options
+
         if (Integer.parseInt(userInput) == optionCounter + 1) {
             int breakInRoom = random.nextInt(0, 9);
-            BreakInSimulator.simulateBreakIn(breakInRoom, rooms, getUserRoom(), isSecurityOn(), random);
+            breakInSimulator.simulateBreakIn(rooms, breakInRoom, isSecurityOn(), getUserRoom());
+            pause();
         } else if (Integer.parseInt(userInput) == optionCounter + 2) {
             int fireRoom = random.nextInt(0, 9);
-            FireSimulator.simulation(fireRoom, rooms, userRoom);
-        } else if (Integer.parseInt(userInput) == optionCounter + 3)
-            MovementSimulator.simulateBackyardMovement(rooms, getUserRoom(), isSecurityOn(), random);
-        else if (Integer.parseInt(userInput) == 0)
+            fireSimulator.simulation(fireRoom, rooms, getUserRoom());
+            pause();
+        } else if (Integer.parseInt(userInput) == optionCounter + 3) {
+            movementSimulator.simulateBackyardMovement(rooms, getUserRoom(), isSecurityOn());
+            pause();
+        } else if (Integer.parseInt(userInput) == 0)
             exit();
     }
 
-    // Print the entire user interface in one line per unique room
-    public static void userInterface(List<String> rooms, boolean isSecurityRoom, int... roomNumbers) {
+    public void userInterface(List<Room> rooms, boolean isSecurityRoom, int... roomNumbers) {
         printRoomOptions(rooms, isSecurityRoom, roomNumbers);
         String userInput = scanner.nextLine();
-        handleUserInput(userInput, isSecurityRoom, roomNumbers);
+        handleUserInput(rooms, userInput, isSecurityRoom, roomNumbers);
     }
 
-    // Print the UI and add all the rooms to the list
     public static void main(String[] args) {
-        rooms.add("Entrance");
-        rooms.add("Living Room");
-        rooms.add("Garage");
-        rooms.add("Bedroom 1");
-        rooms.add("Bedroom 2");
-        rooms.add("Bedroom 5");
-        rooms.add("Bedroom 3");
-        rooms.add("Bedroom 4");
-        rooms.add("Kitchen");
-        rooms.add("Backyard");
-        rooms.add("Porch");
+        Main main = new Main();
+        List<Room> rooms = new ArrayList<>();
+        rooms.add(new Room("Entrance"));
+        rooms.add(new Room("Living Room"));
+        rooms.add(new Room("Garage"));
+        rooms.add(new Room("Bedroom 1"));
+        rooms.add(new Room("Bedroom 2"));
+        rooms.add(new Room("Bedroom 5"));
+        rooms.add(new Room("Bedroom 3"));
+        rooms.add(new Room("Bedroom 4"));
+        rooms.add(new Room("Kitchen"));
+        rooms.add(new Room("Backyard"));
+        rooms.add(new Room("Porch"));
+
+        rooms.get(0).addDefaultDetectors();
+        rooms.get(0).addDetector(new MotionDetector(DetectorGroup.ROBBERY));
+        rooms.get(1).addDefaultDetectors();
+        rooms.get(1).addDetector(new MotionDetector(DetectorGroup.ROBBERY));
+        rooms.get(2).addDefaultDetectors();
+        rooms.get(3).addDefaultDetectors();
+        rooms.get(4).addDefaultDetectors();
+        rooms.get(5).addDefaultDetectors();
+        rooms.get(6).addDefaultDetectors();
+        rooms.get(7).addDefaultDetectors();
+        rooms.get(8).addDetector(new WindowDetector(DetectorGroup.ROBBERY));
+        rooms.get(9).addDetector(new MotionDetector(DetectorGroup.ROBBERY));
 
         while (true) {
-            System.out.println("\n---Security System:" + (isSecurityOn() ? "ON" : "OFF") + "---");
-            System.out.println("Current room: " + rooms.get(getUserRoom()));
+            System.out.println("\n---Security System:" + (main.isSecurityOn() ? "ON" : "OFF") + "---");
+            System.out.println("Current room: " + rooms.get(main.getUserRoom()).getName());
             System.out.println("What would you like to do?");
-            switch (getUserRoom()) {
-                case 0 -> userInterface(rooms, true, 10, 1, 2, 3, 4, 5);
-                case 1 -> userInterface(rooms, true, 0, 6, 7, 8, 9);
-                case 2 -> userInterface(rooms, true, 0, 10);
-                case 3, 4, 5 -> userInterface(rooms, false, 0);
-                case 6, 7, 8, 9 -> userInterface(rooms, false, 1);
-                case 10 -> userInterface(rooms, false, 0, 2);
-                default -> {}
+            switch (main.getUserRoom()) {
+                case 0 -> main.userInterface(rooms, true, 10, 1, 2, 3, 4, 5);
+                case 1 -> main.userInterface(rooms, true, 0, 6, 7, 8, 9);
+                case 2 -> main.userInterface(rooms, true, 0, 10);
+                case 3, 4, 5 -> main.userInterface(rooms, false, 0);
+                case 6, 7, 8, 9 -> main.userInterface(rooms, false, 1);
+                case 10 -> main.userInterface(rooms, false, 0, 2);
+                default -> {
+                }
             }
         }
     }

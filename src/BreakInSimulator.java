@@ -4,24 +4,22 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 public class BreakInSimulator {
-    public static void simulateBreakIn(int breakInRoom, List<String> rooms, int userRoom, boolean securityOn, Random random) {
-        System.out.println("\n---Simulating a break-in, current room: " + rooms.get(userRoom) + "---");
-        System.out.print("The robbers broke into " + rooms.get(breakInRoom) + " and set off");
-        switch (breakInRoom) {
-            case 3, 4, 5, 6, 7, 8 -> System.out.println(" the window alarm.");
-            case 0, 1, 2 -> System.out.println(" the door alarm.");
+    public void simulateBreakIn(List<Room> rooms, int breakInRoom, boolean securityOn, int userRoom) {
+        System.out.println("\n---Simulating a break-in, current room: " + rooms.get(userRoom).getName() + "---");
+        System.out.println("The robbers broke into: " + rooms.get(breakInRoom).getName());
+        if (securityOn && userRoom == breakInRoom) {
+            rooms.get(breakInRoom).activateDetectors(DetectorGroup.ROBBERY);
+            System.out.println("The robbers also see you and run away.");
+        } else if (securityOn) {
+            rooms.get(breakInRoom).activateDetectors(DetectorGroup.ROBBERY);
+            System.out.println("The robbers got scared by the alarm and ran away.");
+        } else if (userRoom == breakInRoom) {
+            System.out.println("You are in the room so the robbers get scared and run away.");
+        } else {
+            nextRoom(rooms, breakInRoom, userRoom);
         }
-        if (securityOn)
-            System.out.println("The robbers get scared by the security alarm.");
-        else if (userRoom == breakInRoom)
-            System.out.println("The robbers get scared after seeing you.");
-        else {
-            BreakInSimulator.nextRoom(breakInRoom, rooms, userRoom, random);
-        }
-        Main.pause();
     }
-
-    public static int generateNextRoom(int min, int max, int breakInRoom, List<Integer> visitedRooms, Random random) {
+    public int generateNextRoom(int min, int max, int breakInRoom, List<Integer> visitedRooms, Random random) {
         int nextRoom = random.nextInt(min, (max + 1));
         boolean containsAll = IntStream.rangeClosed(min, max).allMatch(visitedRooms::contains);
         // Keep generating a new room until an unvisited one is found, if every room is visited move to either living room or entrance
@@ -35,18 +33,17 @@ public class BreakInSimulator {
 
         return nextRoom;
     }
-
-    public static void nextRoomOutput(int breakInRoom, List<String> rooms, int userRoom, List<Integer> visitedRooms) {
+    public void nextRoomOutput(int breakInRoom, List<Room> rooms, int userRoom, List<Integer> visitedRooms) {
         if (userRoom == breakInRoom)
-            System.out.println("The robbers move to " + rooms.get(breakInRoom) + ", were seen by you and ran away.");
+            System.out.println("The robbers move to " + rooms.get(breakInRoom).getName() + ", were seen by you and ran away.");
         else if (!visitedRooms.contains(breakInRoom)) {
-            System.out.println("The robbers move to " + rooms.get(breakInRoom) + " and stole everything in the room.");
+            System.out.println("The robbers move to " + rooms.get(breakInRoom).getName() + " and steal everything in the room.");
             visitedRooms.add(breakInRoom);
         } else
-            System.out.println("The robbers move back to " + rooms.get(breakInRoom) + ".");
+            System.out.println("The robbers move back to " + rooms.get(breakInRoom).getName() + ".");
     }
-
-    public static void nextRoom(int breakInRoom, List<String> rooms, int userRoom, Random random) {
+    private void nextRoom(List<Room> rooms, int breakInRoom, int userRoom) {
+        Random random = new Random();
         List<Integer> visitedRooms = new ArrayList<>();
         visitedRooms.add(breakInRoom);
         int chance = 10;
