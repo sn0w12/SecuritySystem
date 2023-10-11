@@ -23,6 +23,7 @@ class Room {
         addDetector(new DoorDetector(DetectorGroup.ROBBERY));
     }
 
+    // Activates detectors based on the specified event type
     public void activateDetectors(DetectorGroup eventType) {
         for (Detector detector : detectors) {
             if (detector.detect() && (detector.getGroup() == eventType)) {
@@ -173,13 +174,15 @@ public class Main {
         BreakInSimulator breakInSimulator = new BreakInSimulator();
         FireSimulator fireSimulator = new FireSimulator();
         MovementSimulator movementSimulator = new MovementSimulator();
+
+        // Checking if the selected option corresponds to moving to a room.
         for (int i = 1; i < roomNumbers.length + 1; i++) {
             if (i == Integer.parseInt(userInput)) {
-                System.out.println(i);
                 isPresent = true;
                 break;
             }
         }
+        // If the selected option is valid, set the user's room to the chosen room.
         if (isPresent)
             setUserRoom(roomNumbers[Integer.parseInt(userInput) - 1]);
 
@@ -190,6 +193,7 @@ public class Main {
         } else
             optionCounter -= 1;
 
+        // Check and perform actions for simulation options.
         if (Integer.parseInt(userInput) == optionCounter + 1) {
             int breakInRoom = random.nextInt(0, 9);
             breakInSimulator.simulateBreakIn(rooms, breakInRoom, isSecurityOn(), getUserRoom());
